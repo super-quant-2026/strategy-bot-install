@@ -1,0 +1,93 @@
+## Public release deployment — pulls a PyArmor-obfuscated image
+## from GitHub Container Registry. Source code is not in the image.
+##
+## End users:
+##   bash <(curl -sSL https://raw.githubusercontent.com/super-quant-2026/strategy-bot-install/main/install.sh)
+##
+## Manual:
+##   curl -O https://raw.githubusercontent.com/super-quant-2026/strategy-bot-install/main/docker-compose.encrypted.yml
+##   curl -O https://raw.githubusercontent.com/super-quant-2026/strategy-bot-install/main/.env.example
+##   cp .env.example .env && nano .env
+##   docker compose -f docker-compose.encrypted.yml pull
+##   docker compose -f docker-compose.encrypted.yml up -d
+##
+## Override image tag with: IMAGE_TAG=v0.2.0 docker compose -f docker-compose.encrypted.yml up -d
+
+services:
+  bot:
+    image: ghcr.io/super-quant-2026/strategy-bot:${IMAGE_TAG:-v0.1.0-beta}
+    container_name: super-quant-bot
+    restart: always
+    ports:
+      - "${PORT:-3030}:3030"
+    volumes:
+      - ./.env:/app/.env:ro
+      - bot_data:/app/data
+    environment:
+      - TZ=UTC
+      # Sibling-service DNS overrides — values in .env are fine for
+      # bare-metal but inside compose the hostnames resolve to other
+      # containers via the internal network.
+      - REDIS_ENABLED=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_TYPE=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    depends_on:
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: super-quant-redis
+    restart: always
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  mysql:
+    # Pinned to 8.0. Newer mysql:8 tags resolve to 8.4 which dropped
+    # `--default-authentication-plugin` and tweaks defaults; 8.0 is
+    # supported through April 2026 and works clean with aiomysql.
+    image: mysql:8.0
+    container_name: super-quant-mysql
+    restart: always
+    # Use legacy auth — older aiomysql/pymysql versions don't always
+    # speak caching_sha2_password reliably across distros.
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpw}
+      - MYSQL_DATABASE=${DB_NAME:-superquant}
+      - MYSQL_USER=${DB_USER:-botuser}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-botpass}
+    ports:
+      # Bound to localhost only — never expose to the public network.
+      # 3307 avoids collision with any host MySQL on 3306. From host:
+      #   mysql -h 127.0.0.1 -P 3307 -u botuser -p superquant
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  bot_data:
+  redis_data:
+  mysql_data:
