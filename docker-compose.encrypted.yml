@@ -34,6 +34,18 @@ services:
       - DB_TYPE=mysql
       - DB_HOST=mysql
       - DB_PORT=3306
+      # Shared token between bot and the watchtower sidecar — bot's
+      # /api/control/update endpoint uses this to authenticate to
+      # http://watchtower:8080/v1/update. install.sh generates a
+      # random value on first run.
+      - WATCHTOWER_TOKEN=${WATCHTOWER_TOKEN}
+      - IMAGE_TAG=${IMAGE_TAG:-v0.1.0-beta}
+    labels:
+      # Mark this container as in-scope for the watchtower sidecar.
+      # Combined with WATCHTOWER_SCOPE on watchtower service, this means
+      # only the bot gets auto-pulled — mysql / redis stay pinned and
+      # never get a surprise major-version restart.
+      - "com.centurylinklabs.watchtower.scope=strategy-bot"
     depends_on:
       redis:
         condition: service_healthy
@@ -44,6 +56,30 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # Watchtower — pulls new images for any container labelled
+  # `com.centurylinklabs.watchtower.scope=strategy-bot` when its HTTP
+  # API is hit. The bot's /api/control/update endpoint is the only
+  # thing that talks to it (over the internal docker network), and
+  # the bearer token in WATCHTOWER_TOKEN is shared between the two.
+  # docker.sock is mounted ONLY into watchtower, not the bot — the
+  # bot's compromise can't escalate to host without going through
+  # watchtower's HTTP token gate first.
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: sqb-watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_HTTP_API_UPDATE=true
+      - WATCHTOWER_HTTP_API_TOKEN=${WATCHTOWER_TOKEN}
+      - WATCHTOWER_HTTP_API_PERIODIC_POLLS=false
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_SCOPE=strategy-bot
+      - WATCHTOWER_CLEANUP=true
+    # No port published — only reachable as `watchtower:8080` over the
+    # compose-internal network, so the API never faces the public IP.
 
   redis:
     image: redis:7-alpine

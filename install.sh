@@ -98,9 +98,16 @@ if [ ! -f .env ]; then
     RANDOM_PREFIX=$(head -c 8 /dev/urandom | xxd -p | head -c 10)
     RANDOM_DBPW=$(head -c 12 /dev/urandom | base64 | tr -d '+/=' | head -c 16)
     RANDOM_ROOTPW=$(head -c 12 /dev/urandom | base64 | tr -d '+/=' | head -c 16)
+    # WATCHTOWER_TOKEN — shared bearer between bot and watchtower
+    # sidecar. Auto-rotated here so every install gets a fresh value;
+    # leakage only impacts that one user (worst case: someone with
+    # the token can force the bot to pull GHCR and restart — same
+    # surface as the in-app upgrade button itself).
+    RANDOM_WT_TOKEN=$(head -c 24 /dev/urandom | base64 | tr -d '+/=' | head -c 32)
     sed -i "s|^ADMIN_PREFIX=.*|ADMIN_PREFIX=${RANDOM_PREFIX}|" .env
     sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${RANDOM_DBPW}|" .env
     sed -i "s|^MYSQL_ROOT_PASSWORD=.*|MYSQL_ROOT_PASSWORD=${RANDOM_ROOTPW}|" .env
+    sed -i "s|^WATCHTOWER_TOKEN=.*|WATCHTOWER_TOKEN=${RANDOM_WT_TOKEN}|" .env
 
     SERVER_IP=$(curl -fsS --max-time 3 https://api.ipify.org 2>/dev/null || echo "<your-server-ip>")
 
