@@ -6,6 +6,16 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.1.2 — 2026-05-12
+
+### Fixed
+- 升级按钮在 dev / 无 watchtower 环境点击时返回 HTTP 500 — 后端 `/control/update`
+  端点改用 `aiohttp`(项目已有依赖,httpx 没装),失败时返回带 detail 的 503。
+- 升级模态框失败提示从展示原始 JSON body 改为提取 `detail` 字段,可读性提升。
+
+### Changed
+- 升级链路验证:`IMAGE_TAG=latest` 时 watchtower 可正确拉到新版本并重建容器。
+
 ## v0.1.1 — 2026-05-10
 
 ### Added
