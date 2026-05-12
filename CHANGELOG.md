@@ -6,6 +6,15 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.1.3 — 2026-05-12
+
+### Fixed
+- **关键**:`docker-compose.encrypted.yml` 的 bot service 增加 `com.centurylinklabs.watchtower.enable=true` label。v0.1.1/v0.1.2 漏了这个 label,导致 watchtower 在 `LABEL_ENABLE=true` 模式下扫不到 bot 容器(`Scanned=0 Updated=0`),升级按钮**完全无效**。升到 v0.1.3 后需要 `docker compose -f docker-compose.encrypted.yml up -d` 重建 bot 容器让新 label 生效。
+- `/control/update` 改为 fire-and-forget:之前等待 watchtower 同步完成 + 5s 超时,实际 pull 要 20-30s,前端总是误报"升级失败"。现在端点立即返回 200,前端通过 `/health` 轮询版本号变化判断升级成功。
+
+### Changed
+- `install.sh` / `.env.example` / `docker-compose.encrypted.yml` 默认 `IMAGE_TAG=latest` 而不是 `v0.1.0-beta`。Watchtower 监听同一 image:tag 的 digest 变化才能升级,锁版本号等于关掉升级按钮。想锁版本的用户:`IMAGE_TAG=v0.1.3 bash <(curl -sSL .../install.sh)`。
+
 ## v0.1.2 — 2026-05-12
 
 ### Fixed

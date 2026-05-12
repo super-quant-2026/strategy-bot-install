@@ -32,7 +32,11 @@ IMAGE_REPO="super-quant-2026/strategy-bot"
 DEPLOY_REPO="super-quant-2026/strategy-bot-install"
 RAW_BASE="https://raw.githubusercontent.com/${DEPLOY_REPO}/main"
 INSTALL_DIR="${INSTALL_DIR:-/opt/strategy-bot}"
-IMAGE_TAG="${IMAGE_TAG:-v0.1.0-beta}"
+# Default to `latest` so the in-app upgrade button keeps working —
+# watchtower monitors the running image:tag for digest changes, and
+# a pinned versioned tag never gets a new digest. Users who want to
+# pin a specific release can override: IMAGE_TAG=v0.1.2 bash <(curl …).
+IMAGE_TAG="${IMAGE_TAG:-latest}"
 COMPOSE_FILE="docker-compose.encrypted.yml"
 
 # ── 0. Pre-flight ──────────────────────────────────────────────────

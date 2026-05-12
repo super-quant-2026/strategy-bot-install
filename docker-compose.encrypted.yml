@@ -15,7 +15,7 @@
 
 services:
   bot:
-    image: ghcr.io/super-quant-2026/strategy-bot:${IMAGE_TAG:-v0.1.0-beta}
+    image: ghcr.io/super-quant-2026/strategy-bot:${IMAGE_TAG:-latest}
     container_name: super-quant-bot
     restart: always
     ports:
@@ -39,12 +39,17 @@ services:
       # http://watchtower:8080/v1/update. install.sh generates a
       # random value on first run.
       - WATCHTOWER_TOKEN=${WATCHTOWER_TOKEN}
-      - IMAGE_TAG=${IMAGE_TAG:-v0.1.0-beta}
+      - IMAGE_TAG=${IMAGE_TAG:-latest}
     labels:
-      # Mark this container as in-scope for the watchtower sidecar.
-      # Combined with WATCHTOWER_SCOPE on watchtower service, this means
-      # only the bot gets auto-pulled — mysql / redis stay pinned and
-      # never get a surprise major-version restart.
+      # Two labels for the watchtower sidecar:
+      #   enable=true  — opt-in (watchtower runs with LABEL_ENABLE=true,
+      #                  so containers without this are skipped)
+      #   scope=...    — combined with WATCHTOWER_SCOPE on watchtower,
+      #                  isolates this stack from other watchtower
+      #                  installations on the same host
+      # Net effect: only the bot gets auto-pulled — mysql / redis stay
+      # pinned and never get a surprise major-version restart.
+      - "com.centurylinklabs.watchtower.enable=true"
       - "com.centurylinklabs.watchtower.scope=strategy-bot"
     depends_on:
       redis:
