@@ -6,6 +6,19 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.0 — 2026-06-01
+
+### Added
+- 🏆 **利润上报**：平仓后自动把战绩上报到 SuperQuant 排行榜，经交易所逐笔核实后才计分。在「设置 → 利润上报」填入 Bot 令牌即可启用，并提供一键「上报测试」检查与排行榜后端的连通性和鉴权。
+- 📊 **更新日志页**：侧栏新增「更新日志」，以时间线展示每个版本的更新内容与时间。
+- 🔐 **账号密码登录**：新增独立的管理密码登录。
+
+### Changed
+- ⚡ **精简为纯实盘模式**：移除调试 / 模拟下单（paper-trading）与旧的全局风控模块，更轻、更快、更专注于真实套利。
+
+### ⚠️ 升级须知（Breaking）
+- 本版起登录改为**账号密码**，初始密码为 `superquant123`。升级后请用它登录，并**立即在「设置 → 修改密码」中改掉**。忘记密码可在服务器上 `docker exec -it <bot 容器> python -m app.cli.reset_password` 重置。
+
 ## v0.1.3 — 2026-05-12
 
 ### Fixed
