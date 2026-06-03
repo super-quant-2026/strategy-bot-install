@@ -6,6 +6,11 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.3 — 2026-06-03
+
+### Fixed
+- 🐛 **Gate 大面值合约成交修复**：Gate 上「合约面值 > 1」的币种（如 ESPORTS，1 张 = 100 币）开仓时，成交数量在某些情况下被少算（Gate 的小数张被截断 + `size=0` 成交回报约定被 ccxt 读成 0），导致误判「下单已暂停」或只开出单腿、留下单边敞口。现改为按整数张下单 + 用订单自身的 `size`/`left` 校正真实成交量。binance / okx 等其它交易所、以及合约面值 = 1 的币种不受影响。
+
 ## v0.2.2 — 2026-06-03
 
 ### Added
