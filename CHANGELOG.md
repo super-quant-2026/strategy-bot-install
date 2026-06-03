@@ -6,6 +6,11 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.4 — 2026-06-03
+
+### Fixed
+- 🐛 **Gate 小面值合约成交修复**：Gate 上「合约面值 < 1」的币种（如 ETH 永续，1 张 = 0.01 币）开仓时成交数量被少算 —— 按小数张下单后 Gate 把 `order.size`/`left`/持仓 `size` 全报 0（只有 `value`/`fee` 暴露真实成交），导致误判「下单已暂停」或只开出单腿、残留单边持仓。现改为按整数张下单（自动下单量对齐到整张）。其它交易所、以及合约面值 = 1（如 SOL）和 > 1（如 ESPORTS）的币种不受影响。这是 v0.2.3（cs>1）修复的镜像补全。
+
 ## v0.2.3 — 2026-06-03
 
 ### Fixed
