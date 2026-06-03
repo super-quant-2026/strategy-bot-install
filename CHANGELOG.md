@@ -6,6 +6,15 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.2 — 2026-06-03
+
+### Added
+- 🤖 **下单金额全自动**：去掉「单笔最小金额 / 最大金额」设置，系统按每个交易所的真实规则（最小下单量 / 最小名义额 / 价格步进 / 合约面值）自动选取一个合适的单笔下单量（中等偏小、向上取整到可行档）。**不用再手动猜金额**，也不再因金额不符各所最小档而频繁报「下单已暂停 / 只开单腿」。你只需设「最大仓位」控制总规模。
+
+### Fixed
+- ⚡ **行情轮询限流**：修复持仓详情面板高频轮询打爆交易所 REST 限流、导致服务器 IP 被交易所临时封禁（binance 418）的问题；详情接口加 5s 缓存、前端实时刷新放宽到 8s。
+- 🐛 **Gate 小数合约成交识别**：Gate 永续 `enable_decimal` 市场的小数张订单（如 0.2 张）成交后回报 `size=0`，旧逻辑用手续费反推会得到错误成交量、把已成交的腿误判为 underfill 而暂停。改用订单自身的 `finish_as / left / fill_price` 恢复真实成交量。
+
 ## v0.2.1 — 2026-06-03
 
 ### Fixed
