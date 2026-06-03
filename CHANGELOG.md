@@ -6,6 +6,14 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.1 — 2026-06-03
+
+### Fixed
+- **关键**：修复 **OKX / Gate** 等 `contractSize ≠ 1` 的交易所开仓时，成交数量被当成「合约张数」而非「币本位数量」来校验，导致误判「下单已暂停」、只开出单腿、或平仓失败的问题。binance / bitget / aster（`contractSize = 1`）不受影响 —— 升级后这些交易所的开 / 平仓恢复正常。
+
+### Added
+- 📈 系统升级弹窗新增**进度条**（按预估时间平滑推进），升级过程不再是无反馈的「请稍候」。
+
 ## v0.2.0 — 2026-06-01
 
 ### Added
