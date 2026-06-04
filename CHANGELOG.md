@@ -6,6 +6,15 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.5 — 2026-06-04
+
+### Fixed
+- 🐛 **Gate 小数张下单修复**：Gate 上「合约面值 ≠ 1」的币种（如 LAB 每张=100 币、ETH 每张=0.01 币）此前被强制按整数张下单、最小下单金额被抬高（LAB 一度需 ~$1629/腿）。根因是 `下单量 / 合约面值` 的浮点除法误差（如 0.009/0.01=0.8999…）被向下截断少算一张，之前误判成「gate 不支持小数张」。现按 gate 的 `enable_decimal` 字段判定、恢复小数张下单，并在换算处消除浮点误差。binance / okx 等不受影响。
+- 🐛 **Gate 持仓数量显示修复**：Gate 持仓「数量」此前用 `value / 开仓价` 反算而偏大（标记价 > 开仓价时，如 10 LAB 显示成 10.17，与对腿不齐）。改用 `value / 标记价`（gate 的 value 本就是标记价计的市值），现与交易所一致、两腿对齐。
+
+### Added
+- 🔄 **重启服务按钮**：侧边栏「退出登录」上方新增「重启服务」。遇到行情卡顿 / 状态异常时可一键完整重启（约 15-30 秒自动恢复），无需 SSH；已有持仓不受影响。
+
 ## v0.2.4 — 2026-06-03
 
 ### Fixed
