@@ -6,6 +6,14 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.6 — 2026-06-11
+
+### Fixed
+- 🐛 **平仓遇「Price not increased by tick size」自动恢复**：交易所盘中调整价格精度（如 binance 把某币 tick 从 0.0001 调到 0.001）后，旧缓存的交易规格会让平仓单被拒并中止。现检测到此类错误自动重载交易规格、按新精度重算价格并重试一次，无需手动重启服务。
+
+### Added
+- 🧹 **孤儿持仓自动清理**：在交易所手动平掉（或经其它 bot 实例平掉）的仓位，持仓记录不再一直显示「未平」。系统启动后及每 30 分钟核对一次交易所实仓，两腿均确认为零才自动闭合记录（不下单、不造盈亏数据，已删除卡片的遗留记录同样覆盖）。
+
 ## v0.2.5 — 2026-06-04
 
 ### Fixed
