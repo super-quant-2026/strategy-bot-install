@@ -6,6 +6,11 @@ the topmost version below differs from the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.8 — 2026-06-14
+
+### Fixed
+- 💱 **Gate 持仓数量与交易所不一致**修复：Gate 小数合约的整数「张数」字段会被截断（如 0.018 ETH 被读成 0.010），现统一按标记价计算真实币量，卡片显示与交易所一致、两腿对齐（也避免因此误触发「两个交易所持仓对不上」的暂停）。
+
 ## v0.2.7 — 2026-06-14
 
 ### Added
