@@ -2,9 +2,31 @@
 
 Versions track the GHCR image tag (`ghcr.io/super-quant-2026/strategy-bot:vX.Y.Z`).
 The dashboard's sidebar fetches this file at startup and shows a red dot when
-the topmost version below differs from the running image's `BOT_VERSION`.
+the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
+
+## v0.2.10 — 2026-08-31
+
+### Fixed
+- 🔄 **版本检测改用 SemVer 比较**：只有远端版本确实高于当前版本时才提示升级，不再把 `v0.2.8` 误判成 `v0.2.9` 的新版；同时正确处理 `v` 前缀和 beta / rc 预发布版本。
+
+## v0.2.9 — 2026-08-31
+
+### Added
+- 📊 **新增多种实盘策略**：动量多空、插针网格、DMan V3、韭菜收割机，以及同交易所双币种的汇率套利；策略页增加心跳、运行终端、持仓明细和盈亏归属。
+- 🏦 **多账户交易所配置**：同一交易所可保存多组 API Key，并可为账户设置独立标签；策略下拉框明确显示实际使用的账户。
+- 📈 **跨所价差带监测**：记录跨交易所溢价并提供阈值分析，供后续执行策略使用。
+
+### Fixed
+- 🛡️ **订单与持仓安全加固**：重启后核对交易所真实持仓和活动订单；未知订单状态不再被当作已撤销；部分成交、最小下单余量和异步撤单均按真实成交记账。
+- ⚖️ **动量多空持仓同步**：持仓详情直接使用交易所数量、开仓价和标记价，补回账本遗漏仓位；Binance 全量行情故障时安全回退到逐币行情。
+- 🧯 **DMan / 网格 / 韭菜收割机稳定性修复**：修复方向背离、尘埃余量、撤单竞态、重复挂单、错误手续费和停止后遗留订单等问题。
+- 💹 **真实手续费与返佣记账**：成交记录拆分手续费、返佣和净费用，利润页按策略正确归类。
+- 🚨 **动量配对止损崩溃修复**：风险事件字段不再与函数参数重名，止损检查不会因此把策略切入 ERROR。
+
+### Removed
+- 🧹 移除未使用的“配对套利”实盘策略及其页面、接口和数据库表。
 
 ## v0.2.8 — 2026-06-14
 
