@@ -6,6 +6,14 @@ the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.12 — 2026-08-31
+
+### Added
+- 🏆 **全部实盘策略接入战绩上报**：动量多空、插针网格、DMan V3、韭菜收割机和汇率套利的真实平仓成交均会上报；每类策略使用独立游标，并按交易所订单聚合部分成交。
+
+### Fixed
+- 🧾 DMan 与韭菜收割机平仓记录补齐真实订单号；汇率套利从开平仓流水重建每腿实现盈亏，只有具备可核验订单证据的成交才进入排行榜。
+
 ## v0.2.11 — 2026-08-31
 
 ### Added
