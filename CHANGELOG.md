@@ -6,6 +6,14 @@ the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.11 — 2026-08-31
+
+### Added
+- 🪪 **LTP 多账号精准核验**：Bot 与排行榜只读 Key 即使不同，也会通过 RapidX `portfolioId` 生成相同的非敏感 `account_ref`；同一 LTP 路由可绑定多组账号，并用标签区分。
+
+### Fixed
+- ✅ 上报接口统一返回 HTTP 200，修复 Bot 因 201 响应重复扫描成交的问题；Portfolio 身份暂时不可用的交易会独立延后重试，不阻塞后续上报。
+
 ## v0.2.10 — 2026-08-31
 
 ### Fixed
