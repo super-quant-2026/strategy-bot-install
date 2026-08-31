@@ -6,6 +6,11 @@ the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.2.13 — 2026-08-31
+
+### Fixed
+- 📦 全策略历史成交改为每 50 笔分批上报，避免首次接入时请求体过大返回 HTTP 413；任一批失败都不会推进游标或丢失记录。
+
 ## v0.2.12 — 2026-08-31
 
 ### Added
