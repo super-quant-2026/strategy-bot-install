@@ -1,0 +1,50 @@
+# Publishing this file IS the user-facing release announcement: every
+# dashboard fetches CHANGELOG.md from main, compares the topmost version
+# against its own BOT_VERSION, and shows the update dot when it is newer.
+#
+# So the one mistake that must never reach main is announcing a version
+# whose image does not exist — the user clicks update and gets nothing,
+# and there is no taking the notice back once they have seen it. This
+# checks the topmost version is actually pullable from GHCR.
+name: Verify changelog
+
+on:
+  push:
+    branches: [main]
+    paths: ['CHANGELOG.md']
+  pull_request:
+    paths: ['CHANGELOG.md']
+  workflow_dispatch:
+
+jobs:
+  image-exists:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Topmost version must be published to GHCR
+        run: |
+          set -euo pipefail
+          REPO=super-quant-2026/strategy-bot
+
+          TOP="$(grep -m1 '^## ' CHANGELOG.md | sed -n 's/^## \(v[0-9][^ ]*\).*/\1/p')"
+          if [ -z "$TOP" ]; then
+            echo "::error::could not read a vX.Y.Z heading from the top of CHANGELOG.md"
+            exit 1
+          fi
+          echo "Topmost changelog version: $TOP"
+
+          TOKEN="$(curl -fsS "https://ghcr.io/token?scope=repository:${REPO}:pull&service=ghcr.io" \
+            | python3 -c 'import sys,json; print(json.load(sys.stdin)["token"])')"
+          ACCEPT='application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json'
+          CODE="$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" -H "Accept: $ACCEPT" \
+            "https://ghcr.io/v2/${REPO}/manifests/${TOP}")"
+
+          if [ "$CODE" != "200" ]; then
+            echo "::error::${TOP} is not published to GHCR (HTTP $CODE). Tag the"
+            echo "::error::release and wait for the image before announcing it here,"
+            echo "::error::or every dashboard will offer an update that cannot be pulled."
+            exit 1
+          fi
+          echo "✅ ghcr.io/${REPO}:${TOP} exists — safe to announce"
