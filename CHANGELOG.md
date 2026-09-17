@@ -6,6 +6,19 @@ the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.3.1 — 2026-09-17
+
+### Removed
+- 🚨 **DEBUG_MODE**：这个变量声称 `1 = 模拟盘`,但引擎里的模拟下单早已被移除,近期没有任何代码读它 —— 新装的 bot 一直在真实下单,而它自己的 `.env` 告诉操作者不是。变量已删除,文档改为明确写出「每一单都是真实订单」。
+- 🔑 **ADMIN_PASSWORD**：同样是死配置。真正的初始密码是 `superquant123`,由 bot 自身持有;改密码后以 bcrypt 哈希存入数据库,因此重新部署不会丢失。该行已删除,改为说明密码实际存放位置与忘记后的重置命令。
+
+### Changed
+- 🔗 **控制台前缀固定为 `super-quant`**,不再随机生成 —— 面板地址即 `http://<你的IP>:3030/super-quant/`。需要隐藏路径的,改 `.env` 里的 `ADMIN_PREFIX` 后 `docker compose up -d` 重启即可。
+- ⚠️ 由于地址与初始密码对每台安装都相同,安装脚本的安全提示改为以「暴露端口前先改密码」开头。
+
+### Added
+- 🧪 发布流程新增一致性校验:tag、源码版本号与更新日志三者不一致时,CI 拒绝构建镜像;本仓库也新增校验,拒绝宣告一个 GHCR 上并不存在的版本。
+
 ## v0.3.0 — 2026-09-17
 
 ### Added
