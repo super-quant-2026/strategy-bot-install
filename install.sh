@@ -99,7 +99,6 @@ if [ ! -f .env ]; then
     # Auto-generate sane initial values so the bot can boot to the
     # login page without manual edits. User still has to set their
     # ADMIN_PASSWORD before exposing the dashboard publicly.
-    RANDOM_PREFIX=$(head -c 8 /dev/urandom | xxd -p | head -c 10)
     RANDOM_DBPW=$(head -c 12 /dev/urandom | base64 | tr -d '+/=' | head -c 16)
     RANDOM_ROOTPW=$(head -c 12 /dev/urandom | base64 | tr -d '+/=' | head -c 16)
     # WATCHTOWER_TOKEN — shared bearer between bot and watchtower
@@ -108,7 +107,6 @@ if [ ! -f .env ]; then
     # the token can force the bot to pull GHCR and restart — same
     # surface as the in-app upgrade button itself).
     RANDOM_WT_TOKEN=$(head -c 24 /dev/urandom | base64 | tr -d '+/=' | head -c 32)
-    sed -i "s|^ADMIN_PREFIX=.*|ADMIN_PREFIX=${RANDOM_PREFIX}|" .env
     sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${RANDOM_DBPW}|" .env
     sed -i "s|^MYSQL_ROOT_PASSWORD=.*|MYSQL_ROOT_PASSWORD=${RANDOM_ROOTPW}|" .env
     sed -i "s|^WATCHTOWER_TOKEN=.*|WATCHTOWER_TOKEN=${RANDOM_WT_TOKEN}|" .env
@@ -119,16 +117,20 @@ if [ ! -f .env ]; then
     warn "═══════════════════════════════════════════"
     warn "  Edit ${INSTALL_DIR}/.env BEFORE going live:"
     warn "═══════════════════════════════════════════"
-    echo "  - ADMIN_PASSWORD: change from 'changeme'"
-    echo "  - DEBUG_MODE: 1 = paper trading, 0 = real orders"
-    echo ""
+    DEFAULT_PREFIX=$(grep -E '^ADMIN_PREFIX=' .env | cut -d= -f2)
     echo -e "  Dashboard URL after start:"
-    echo -e "    ${BLUE}http://${SERVER_IP}:3030/${RANDOM_PREFIX}/${NC}"
+    echo -e "    ${BLUE}http://${SERVER_IP}:3030/${DEFAULT_PREFIX}/${NC}"
+    echo "    Initial password: superquant123"
     echo ""
-    echo -e "  ${YELLOW}Security:${NC}"
+    echo -e "  ${YELLOW}Read this before you expose the port:${NC}"
+    echo "    - That URL and that password are the SAME for every install."
+    echo "      Log in and change the password in Settings immediately — until"
+    echo "      you do, anyone who can reach port 3030 can reach your bot."
+    echo "    - Want the path non-obvious too? Set ADMIN_PREFIX in .env now."
+    echo "    - Firewall: only expose port 3030 to addresses you trust"
     echo "    - API keys: TRADE permission only, NO withdrawal"
     echo "    - API keys: whitelist this server's IP if the venue supports it"
-    echo "    - Firewall: only expose port 3030 to addresses you trust"
+    echo "    - Every order this bot places is real. There is no paper mode."
     echo ""
     read -rp "Press ENTER to continue once you've reviewed .env (or Ctrl-C to edit first)..." _
 fi
