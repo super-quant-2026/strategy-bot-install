@@ -6,6 +6,19 @@ the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.3.2 — 2026-09-18
+
+### Fixed
+- 🩺 **数据库迁移静默失效(重要)**：v0.3.0 删除跨所价差带模型时,`alembic/env.py` 里漏了一处 import,导致每次启动 `alembic upgrade` 直接失败;而该失败被降级为一条警告并回退到「只建新表、不加新列」的路径。**v0.3.0 与 v0.3.1 这两版的迁移一直没有执行**,唯一痕迹是启动日志里一行 WARNING。升级到本版即恢复,启动日志会显示 `Database migrations applied (Alembic)`。
+- 📦 **pymysql 版本下限**：v0.3.0 的镜像完全无法启动 —— PyMySQL 1.2.1 删除了 aiomysql 在模块加载时 import 的 `escape_dict`,而依赖未写上限,构建时正好解析到该版本。下限已锁定 1.2.3。
+
+### Added
+- 🔐 **登录时提示「无人设防」状态**：仍在使用初始密码且未配置 2FA 时,登录成功后先显示一屏警告并说明如何处理。警告**仅在密码验证通过之后**出现 —— 未登录页面不会透露「本机默认密码有效」。
+- 🏷️ **添加账号只需一个名字**：原先「账号标识 + 标签」两个字段填得不一致,会让同一个账号出现两个名字(账户键 `@dman-bnb-eth`、卡片 `dman2`、成交记录又是另一种)。现在只问一次,输入的内容同时作为标识与显示名;`Dman1` / `dman 1` / `my_hedge` 会自动规范化。
+
+### Changed
+- 🔍 **成交记录显示账号名而非原始账户键**：利润页此前直接打印 `ltp-binance@dman-bnb-eth`,是全站唯一未做该映射的页面。已有账号的标识不变,仅显示解析为其标签。
+
 ## v0.3.1 — 2026-09-17
 
 ### Removed
