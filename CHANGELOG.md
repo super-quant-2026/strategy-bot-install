@@ -6,6 +6,12 @@ the topmost version below is newer than the running image's `BOT_VERSION`.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/) loosely.
 
+## v0.4.3 — 2026-11-06
+
+### Fixed
+- 🧯 **插针网格在急跌中被误停**：挂单落地时已经穿过卖一的 post-only(GTX)买单,会被 LTP 在 1-2 毫秒内系统撤销;引擎把一整窗这样的撤销当成「看不到自己的订单」,连续两轮就停掉实例(`3 order(s) vanished with no fills`)。现在下单后 1 秒内由 LTP 系统撤销的 GTX 单按 post-only 拒单计,不再触发熔断;真正被人或交易所从盘口撤掉的整批挂单仍会停机。
+- 🧹 **熔断那一轮不再继续挂单**：此前实例刚停,同一轮还会再挂一整窗买单,留在交易所上无人管理、成交后也没有止盈。
+
 ## v0.4.2 — 2026-11-06
 
 ### Fixed
